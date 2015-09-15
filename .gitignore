@@ -1,0 +1,5 @@
+# Created by .ignore support plugin (hsz.mobi)
+*.py[cod]
+
+settmp.bat
+.idea
