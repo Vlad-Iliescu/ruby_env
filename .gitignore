@@ -3,3 +3,6 @@
 
 settmp.bat
 .idea
+
+dist/*
+!dist/.keep
