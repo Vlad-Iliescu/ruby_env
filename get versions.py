@@ -11,7 +11,6 @@ else:
     raise IOError('Cannot connect to RubyInstaller.')
 
 
-
 class VersionHandler(xml.sax.ContentHandler):
     def __init__(self):
         self.in_li = False
@@ -49,6 +48,7 @@ class VersionHandler(xml.sax.ContentHandler):
             if self.in_li:
                 self.version = content
 
+
 parser = xml.sax.make_parser()
 handler = VersionHandler()
 parser.setContentHandler(handler)
@@ -61,4 +61,8 @@ href = handler.versions[version]
 req = requests.get(href)
 
 if req.status_code == 200:
-    open('dist/{0}.7z'.format(version), 'wb').write(req.content)
+    import re
+
+    filename = 'dist/{0}.7z'.format(re.sub('[ \.]', '', version).lower())
+
+    open(filename, 'wb').write(req.content)
