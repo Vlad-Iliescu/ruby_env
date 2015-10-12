@@ -1,4 +1,5 @@
 import argparse
+from core import Db
 from logger.app_logger import AppLogger
 
 
@@ -10,6 +11,7 @@ class Application():
     def __init__(self, args):
         self.logger = AppLogger().logger
         self.parse_command(args)
+        self.db = Db()
 
     def list(self):
         pass
