@@ -3,9 +3,12 @@ import datetime
 
 from core.database import Version
 from core.database import Available
+from core.lib import Singleton
 
 
 class Db():
+    __metaclass__ = Singleton
+
     def __init__(self):
         sqlite3.register_adapter(datetime.datetime, self.adapt_datetime)
         sqlite3.register_converter('DATETIME', self.convert_datetime)
@@ -30,9 +33,9 @@ class Db():
         self.cursor.execute(Version.to_table())
         self.cursor.execute(Available.to_table())
 
-    ########################
-    ##  Version Model
-    ########################
+    # #######################
+    # #  Version Model
+    # #######################
 
     def save_version(self, version):
         query = version._prepare_insert()
@@ -50,7 +53,7 @@ class Db():
         result = self.cursor.fetchone()
         return Version(result['version'], result['folder'], result['id'], result['date_added'])
 
-    #######################
+    # ######################
     ##  Available Model
     #######################
 
