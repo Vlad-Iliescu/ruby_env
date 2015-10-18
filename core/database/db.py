@@ -2,7 +2,6 @@ import sqlite3
 import datetime
 
 from core.database import Version
-from core.database import Available
 from core.lib import Singleton
 
 
@@ -31,7 +30,12 @@ class Db():
 
     def _make_structure(self):
         self.cursor.execute(Version.to_table())
-        self.cursor.execute(Available.to_table())
+
+    def insert_record(self, record):
+        query, params = record.insert()
+        self.cursor.execute(query, params)
+        record.id = self.cursor.lastrowid
+
 
     # #######################
     # #  Version Model
@@ -53,25 +57,6 @@ class Db():
         result = self.cursor.fetchone()
         return Version(result['version'], result['folder'], result['id'], result['date_added'])
 
-    # ######################
-    ##  Available Model
-    #######################
-
-    def save_available(self, available):
-        query = available._prepare_insert()
-        self.cursor.execute(*query)
-        version.id = self.cursor.lastrowid
-        version.date_added = query[1][2]
-
-    def get_available_by_id(self, id):
-        self.cursor.execute(Available._prepare_get_id(), (id,))
-        result = self.cursor.fetchone()
-        return Available(result['version'], result['url'], result['id'], result['date_added'])
-
-    def get_available_by_nr(self, nr):
-        self.cursor.execute(Available._prepare_get_nr(), (nr,))
-        result = self.cursor.fetchone()
-        return Available(result['version'], result['url'], result['id'], result['date_added'])
 
 
 if __name__ == '__main__':
