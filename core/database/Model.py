@@ -1,70 +1,63 @@
-from core.database import Db
+import datetime
+from builtins import dict
+
+from future.utils import with_metaclass
+from core.database import Db, Field
 
 
 class ModelMeta(type):
-    def __init__(cls, name, bases, nmspc):
-        super(ModelMeta, cls).__init__(name, bases, nmspc)
-        cls.db = classmethod(lambda: Db())
+    db = Db()
+
+    def __init__(cls, name, what, *fields):
+        super().__init__(what)
+
+    def __new__(mcs, name, *fields):
+        try:
+            Model
+        except NameError:
+            return type.__new__(mcs, name, *fields)
+
+        sql_fields = dict([(f.field_name, f) for f in fields if isinstance(f, Field)])
+        if 'id' not in sql_fields:
+            sql_fields['id'] = Field('id', Field.INT, extra_options='PRIMARY KEY AUTOINCREMENT')
+        if 'created_at' not in sql_fields:
+            sql_fields['created_at'] = Field('created_at', Field.DATETIME, default_value=datetime.datetime.now)
+        attributes = {
+            'table_name': name,
+            'sql_fields': sql_fields,
+            '__db': mcs.db
+        }
+        klass = type.__new__(mcs, name.title(), (Model,), attributes)
+        mcs.__create_table__(klass)
+        return klass
+
+    @classmethod
+    def __create_table__(mcs, klass):
+        fields = []
+        for field in klass.sql_fields.values():
+            fields.append(field.to_sql())
+        query = "CREATE TABLE IF NOT EXISTS {table_name} ({fields});" \
+            .format(
+                table_name=klass.table_name, fields=', '.join(fields))
+        mcs.db.execute_sql(query)
 
 
-class Field(object):
-    STR = 'TEXT'
-    DATETIME = 'DATETIME'
-    INT = 'INTEGER'
-    NULL = 'NULL'
-    FLOAT = 'REAL'
-    BLOB = 'BLOB'
+class Model(with_metaclass(ModelMeta, object)):
+    def __init__(self, *args, **kwargs):
+        a = 11
 
-    def __init__(self, field_name, field_type, default=False):
-        self.field_name = field_name
-        self.field_type = field_type
-        self.default = default
+    @classmethod
+    def __create_table(cls):
+        return {}
 
-    def field_default(self):
-        if self.default is not False:
-            return '{0}'.format(self.default)
-        return ''
-
-    def to_sql(self):
-        return '{field_name} {field_type} {field_default}'.format(field_type=self.field_type,
-                                                                  field_name=self.field_name,
-                                                                  field_default=self.field_default())
+    def _crsp(self):
+        return self.sql_fields
 
 
-class Model(object):
-    __metaclass__ = ModelMeta
+Version = ModelMeta('version', Field('name', Field.STR, Field.NULL), Field('type', Field.INT))
+v1 = Version()
+v1
 
-    def __init__(self, table_name, *fields):
-        self.__table = table_name
-        self.__fields = fields
-        self.__field_list = {f.field_name: f for f in fields}
-
-    def __call__(self, **kwargs):
-        for key, value in kwargs.iteritems():
-            if key in self.__field_list:
-                setattr(self, key, value)
-        return self
-
-    # todo: move to meta
-    def save(self):
-        self.db
-
-    def insert(self):
-        return '''INSERT INTO {table_name}(fields) VALUES ({placeholders});''' \
-            .format(table_name=self.__table, fields=', '.join(f for f in self.__field_list),
-                    placeholders=','.join('?' for _ in self.__field_list)), (getattr(self, f) for f in self.__field_list)
-
-    def to_sql(self):
-        return '''CREATE TABLE IF NOT EXISTS {table_name}(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            {fields}
-        );'''.format(table_name=self.__table, fields=', '.join(map(lambda field: field.to_sql(), self.__fields)))
-
-
-Version = Model('version', Field('name', Field.STR, Field.NULL), Field('type', Field.INT))
-
-v1 = Version(name=2, b=3)
-v1.save()
-v1.name
-
-1 == 1
+Name = ModelMeta('name', Field('name', Field.STR, Field.NULL))
+n1 = Name()
+n1

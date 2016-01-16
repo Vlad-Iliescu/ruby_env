@@ -17,7 +17,7 @@ class Db():
         self.connection.row_factory = sqlite3.Row
         self.cursor = self.connection.cursor()
 
-        self._make_structure()
+        # self._make_structure()
 
 
     @staticmethod
@@ -35,6 +35,11 @@ class Db():
         query, params = record.insert()
         self.cursor.execute(query, params)
         record.id = self.cursor.lastrowid
+
+    def execute_sql(self, sql):
+        if not sql:
+            return None
+        return self.cursor.execute(sql)
 
 
     # #######################
