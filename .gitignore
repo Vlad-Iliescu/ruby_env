@@ -3,6 +3,7 @@
 
 settmp.bat
 core/database/versions.db
+app/versions.db
 .idea
 
 dist/*
