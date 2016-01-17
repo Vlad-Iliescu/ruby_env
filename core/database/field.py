@@ -10,7 +10,7 @@ class Field(object):
         self.field_name = field_name
         self.field_type = field_type
         self.default = default
-        self.default_value = default_value or ''
+        self.default_value = default_value
         self.extra_options = extra_options or ''
 
     def field_default_sql(self):

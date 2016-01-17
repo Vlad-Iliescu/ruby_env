@@ -3,6 +3,7 @@ from builtins import dict
 
 from future.utils import with_metaclass
 from core.database import Db, Field
+from core.database.db import RecordNotFound
 
 
 class ModelMeta(type):
@@ -25,8 +26,10 @@ class ModelMeta(type):
         attributes = {
             'table_name': name,
             'sql_fields': sql_fields,
-            '__db': mcs.db
+            'db': mcs.db
         }
+        for k in sql_fields:
+            attributes[k] = None
         klass = type.__new__(mcs, name.title(), (Model,), attributes)
         mcs.__create_table__(klass)
         return klass
@@ -36,28 +39,40 @@ class ModelMeta(type):
         fields = []
         for field in klass.sql_fields.values():
             fields.append(field.to_sql())
-        query = "CREATE TABLE IF NOT EXISTS {table_name} ({fields});" \
-            .format(
-                table_name=klass.table_name, fields=', '.join(fields))
-        mcs.db.execute_sql(query)
+        mcs.db.create_table(klass.table_name, fields)
 
 
 class Model(with_metaclass(ModelMeta, object)):
-    def __init__(self, *args, **kwargs):
-        a = 11
+    """
+    :type self.sql_fields: dict
+    :type self.table_name: str
+    :type self.db: Db
+    """
+
+    def __init__(self, **kwargs):
+        for k in kwargs:
+            if k in self.sql_fields:
+                setattr(self, k, kwargs[k])
+
+    def save(self):
+        keys = []
+        values = []
+        for k in self.sql_fields:
+            keys.append(k)
+            values.append(getattr(self, k) or self.sql_fields[k].field_default_value())
+        self.id = self.db.insert_or_update_record(self.table_name, keys, values)
 
     @classmethod
-    def __create_table(cls):
-        return {}
+    def find(cls, record_id):
+        return cls.find_by('id', record_id)
 
-    def _crsp(self):
-        return self.sql_fields
+    @classmethod
+    def find_by(cls, key, value):
+        record = cls.db.find_record_by(cls.table_name, key, value)
+        if record is None:
+            raise RecordNotFound()
+        return cls(**dict(record))
 
 
-Version = ModelMeta('version', Field('name', Field.STR, Field.NULL), Field('type', Field.INT))
-v1 = Version()
-v1
-
-Name = ModelMeta('name', Field('name', Field.STR, Field.NULL))
-n1 = Name()
-n1
+def create_model(name, *fields):
+    return ModelMeta(name, *fields)

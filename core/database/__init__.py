@@ -1,6 +1,5 @@
-__all__ = ['Version', 'Db', 'Field', 'Model']
-
-from core.database.version import Version
-from core.database.db import Db
+from core.database.db import Db, RecordNotFound, DbException
 from core.database.field import Field
-from core.database.model import Model
+from core.database.model import ModelMeta, create_model
+
+__all__ = ['create_model', 'Db', 'DbException', 'RecordNotFound', 'Field', 'ModelMeta']
