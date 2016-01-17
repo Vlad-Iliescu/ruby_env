@@ -2,8 +2,7 @@
 *.py[cod]
 
 settmp.bat
-core/database/versions.db
-app/versions.db
+db/versions.db
 .idea
 
 dist/*

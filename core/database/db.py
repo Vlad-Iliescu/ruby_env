@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import datetime
 
@@ -18,7 +19,7 @@ class Db(with_metaclass(Singleton, object)):
         sqlite3.register_adapter(datetime.datetime, self.adapt_datetime)
         sqlite3.register_converter('DATETIME', self.convert_datetime)
 
-        self.db_name = 'versions.db'
+        self.db_name = os.path.abspath('../../db/versions.db')
         self.connection = sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_DECLTYPES, isolation_level=None)
         self.connection.row_factory = sqlite3.Row
         self.cursor = self.connection.cursor()

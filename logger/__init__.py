@@ -1,3 +1,3 @@
-__all__ = ['ColorStream']
+from logger.color_stream import ColorStream
 
-from color_stream import ColorStream
+__all__ = ['ColorStream']
