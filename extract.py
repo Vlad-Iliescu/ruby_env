@@ -35,7 +35,7 @@ exit(0)
 
 cmd = '7za.exe x {0} -y -o{1}'.format(file, 'dist')
 print(cmd)
-process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, close_fds=True)
 for line in iter(process.stdout.readline, ''):
     print(line.rstrip())
 # process.wait()
