@@ -2,11 +2,13 @@ import os
 import re
 import subprocess
 
+from core.lib import utils
+
 
 class Extractor(object):
     def __init__(self):
-        self.archive_path = os.path.abspath('../../dist/')
-        self._7zip = path = os.path.abspath('7za.exe')
+        self.archive_path = utils.app_path('dist')
+        self._7zip = utils.app_path('core/archive/7za.exe')
         self._info_cmd = '%s l {0} | FINDSTR "[0-9].D....\>" | FIND /V "\\"' % self._7zip
         self._extract_cmd = '%s x {0} -y -o{1}' % self._7zip
 
@@ -23,7 +25,9 @@ class Extractor(object):
         archive = self.get_abs_path(filename)
         dest = self.get_abs_path(destination)
         status, output = subprocess.getstatusoutput(self._extract_cmd.format(archive, dest))
-        return status, output
+
+        if status != 0:
+            raise RuntimeError(output)
 
 
 if __name__ == '__main__':

@@ -54,6 +54,9 @@ class Model(with_metaclass(ModelMeta, object)):
             if k in self.sql_fields:
                 setattr(self, k, kwargs[k])
 
+    def __repr__(self, *args, **kwargs):
+        return "<%s id=%s>" % (self.__class__.__name__, self.id)
+
     def save(self):
         keys = []
         values = []
@@ -62,9 +65,22 @@ class Model(with_metaclass(ModelMeta, object)):
             values.append(getattr(self, k) or self.sql_fields[k].field_default_value())
         self.id = self.db.insert_or_update_record(self.table_name, keys, values)
 
+    def remove(self):
+        self.db.remove_record(self.table_name, self.id)
+        self.id = None
+
     @classmethod
     def find(cls, record_id):
         return cls.find_by('id', record_id)
+
+    @classmethod
+    def truncate(cls):
+        cls.db.truncate(cls.table_name)
+
+    @classmethod
+    def all(cls):
+        records = cls.db.all(cls.table_name)
+        return [cls(**dict(record)) for record in records]
 
     @classmethod
     def find_by(cls, key, value):
