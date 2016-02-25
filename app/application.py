@@ -83,7 +83,7 @@ if __name__ == '__main__':
     app = Application({})
     # app.get_available_versions()
     # list_ = app.list_available_versions()
-    app.install_version('ruby_2_1_6', 'ruby216-2')
-    list_ = app.get_installed()
+    # app.install_version('ruby_2_1_6', 'ruby216-2')
+    # list_ = app.get_installed()
     # app.remove_version('ruby216-2')
     pass
