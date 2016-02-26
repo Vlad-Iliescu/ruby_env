@@ -7,3 +7,6 @@ db/versions.db
 
 dist/*
 !dist/.keep
+
+# ignore bat file content
+core/environment/setenv.bat

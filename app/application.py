@@ -1,8 +1,10 @@
 import os
 import shutil
+import subprocess
 
 from core.archive import Extractor
 from core.database import RecordNotFound
+from core.environment import VarSetter
 from core.source import Fetcher
 from app import Version, Available
 from core.lib import utils
@@ -13,7 +15,7 @@ __all__ = ['Application']
 
 class Application(object):
     def __init__(self, args):
-        pass
+        self.rm_cmd = 'rd /s /q {path}'
 
     def get_available_versions(self):
         fetcher = Fetcher()
@@ -75,14 +77,20 @@ class Application(object):
     def remove_version(self, version):
         installed = Version.find_by('name', version)
         installed.remove()
-        shutil.rmtree(installed.folder)  # fixme: not working -> permission issues
+        subprocess.getstatusoutput(self.rm_cmd.format(path=installed.folder))
 
+    @staticmethod
+    def set_version(version):
+        v = Version.find_by('name', version)
+        setter = VarSetter()
+        setter.set_version('\\'.join([v.folder, 'bin']))
 
 if __name__ == '__main__':
     app = Application({})
     # app.get_available_versions()
     # list_ = app.list_available_versions()
     # app.install_version('ruby_2_1_6', 'ruby216-2')
-    list_ = app.get_installed()
-    app.remove_version('ruby216-2')
+    # list_ = app.get_installed()
+    # app.remove_version('ruby216-2')
+    app.set_version('ruby216-2')
     pass
