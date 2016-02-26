@@ -21,7 +21,8 @@ class Fetcher(object):
         self.__parse()
         return self.handler.versions
 
-    def get_version(self, version, url, name=None):
+    @staticmethod
+    def get_version(version, url, name=None):
         req = requests.get(url)
         if req.status_code == 200:
             folder = utils.ruby_version_from_string(version)

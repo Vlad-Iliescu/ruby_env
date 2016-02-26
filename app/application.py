@@ -4,6 +4,7 @@ import subprocess
 
 from core.archive import Extractor
 from core.database import RecordNotFound
+from core.environment import VarSetter
 from core.source import Fetcher
 from app import Version, Available
 from core.lib import utils
@@ -78,6 +79,11 @@ class Application(object):
         installed.remove()
         subprocess.getstatusoutput(self.rm_cmd.format(path=installed.folder))
 
+    @staticmethod
+    def set_version(version):
+        v = Version.find_by('name', version)
+        setter = VarSetter()
+        setter.set_version('\\'.join([v.folder, 'bin']))
 
 if __name__ == '__main__':
     app = Application({})
@@ -86,4 +92,5 @@ if __name__ == '__main__':
     # app.install_version('ruby_2_1_6', 'ruby216-2')
     # list_ = app.get_installed()
     # app.remove_version('ruby216-2')
+    app.set_version('ruby216-2')
     pass
